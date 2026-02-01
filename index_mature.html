@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rookie - Mature Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(20, 20, 30, 0.95);
+            max-width: 900px;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8B0000 0%, #450000 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 3px solid #ff0000;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            letter-spacing: 3px;
+        }
+
+        .badge {
+            font-size: 0.9em;
+            opacity: 0.9;
+            letter-spacing: 2px;
+            color: #ffcccc;
+        }
+
+        .warning {
+            background: rgba(255, 0, 0, 0.2);
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: #ff6666;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .story-container {
+            padding: 40px;
+            min-height: 400px;
+            background: rgba(10, 10, 20, 0.5);
+        }
+
+        .story-text {
+            font-size: 1.15em;
+            line-height: 1.9;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            text-align: justify;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .action-indicator {
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 18px 25px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
+        .choice-btn.violent {
+            border-color: rgba(255, 0, 0, 0.5);
+            background: linear-gradient(135deg, #2d0a0a 0%, #1a0505 100%);
+        }
+
+        .choice-btn.diplomatic {
+            border-color: rgba(0, 255, 0, 0.3);
+            background: linear-gradient(135deg, #0a2d0a 0%, #051a05 100%);
+        }
+
+        .choice-btn.corrupt {
+            border-color: rgba(255, 215, 0, 0.4);
+            background: linear-gradient(135deg, #2d2d0a 0%, #1a1a05 100%);
+        }
+
+        .choice-btn:active {
+            transform: translateY(0);
+        }
+
+        .stats {
+            background: rgba(20, 20, 30, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .stat-value.low {
+            color: #ff4444;
+        }
+
+        .stat-value.high {
+            color: #44ff44;
+        }
+
+        .ending {
+            background: linear-gradient(135deg, #8B0000 0%, #450000 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            border: 2px solid rgba(255, 0, 0, 0.5);
+        }
+
+        .ending h2 {
+            margin-bottom: 15px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .ending.best {
+            background: linear-gradient(135deg, #006400 0%, #003200 100%);
+            border-color: rgba(0, 255, 0, 0.5);
+        }
+
+        .ending.bad {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            border-color: rgba(100, 100, 100, 0.5);
+        }
+
+        .restart-btn {
+            background: white;
+            color: #8B0000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .story-container {
+                padding: 20px;
+            }
+            
+            .story-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🚔 THE ROOKIE</h1>
+            <div class="badge">MATURE EDITION - 17+</div>
+        </div>
+        
+        <div class="warning">
+            ⚠️ ADVERTENCIA: Este juego contiene violencia gráfica, lenguaje fuerte y situaciones intensas. No apto para menores.
+        </div>
+        
+        <div class="story-container">
+            <div class="stats" id="stats">
+                <div class="stat">
+                    <div class="stat-label">Moral</div>
+                    <div class="stat-value" id="morality">50</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Reputación</div>
+                    <div class="stat-value" id="reputation">50</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Instinto</div>
+                    <div class="stat-value" id="instinct">50</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Violencia</div>
+                    <div class="stat-value" id="violence">0</div>
+                </div>
+            </div>
+            
+            <div class="story-text" id="story"></div>
+            <div class="choices" id="choices"></div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            morality: 50,
+            reputation: 50,
+            instinct: 50,
+            violence: 0,
+            currentScene: 'inicio',
+            decisions: [],
+            kills: 0,
+            wounded: 0
+        };
+
+        const scenes = {
+            inicio: {
+                text: `Primer día. 6:47 AM.\n\nLa estación apesta a café viejo y desesperación. Tu nueva placa todavía brilla, no como las de los veteranos que están desgastadas por años de mierda.\n\nEl Sargento Rodríguez se acerca. Cicatrices en la cara, ojos que han visto demasiado. "Novato. Conmigo. Y escucha bien: aquí afuera no hay héroes, solo supervivientes y cadáveres. ¿Entendido?"\n\nTe lanza un chaleco antibalas. Pesa como la puta realidad.`,
+                choices: [
+                    {
+                        text: '"Entendido, Sargento. Haré lo que sea necesario."',
+                        next: 'patrulla_dura',
+                        effects: { morality: -5, reputation: 10, instinct: 5 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '"Sí señor, pero... ¿no hay protocolos que seguir?"',
+                        next: 'patrulla_dura',
+                        effects: { morality: 10, reputation: -5, instinct: -5 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '"Entiendo. Las calles son jodidas, pero vine a hacer la diferencia."',
+                        next: 'patrulla_dura',
+                        effects: { morality: 5, instinct: 10 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            patrulla_dura: {
+                text: `90 minutos después...\n\nLa radio explota con estática: "TODAS LAS UNIDADES - 211 EN PROGRESO, TIENDA 7-ELEVEN CALLE ELM. SOSPECHOSO ARMADO. POSIBLES DISPAROS."\n\nRodríguez ya tiene el pie en el acelerador. "¿Listo para tu bautismo de fuego, novato?"\n\nEstán a tres cuadras. Pueden oír las sirenas de otras unidades más lejos.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(ACELERAR)</span> "¡VAMOS! Somos los más cercanos, carajo!"',
+                        next: 'llegada_rapida',
+                        effects: { reputation: 15, instinct: 10, morality: 5 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(EVALUAR)</span> "Esperemos respaldo. No sabemos con qué nos enfrentamos."',
+                        next: 'espera_respaldo',
+                        effects: { instinct: 15, morality: 10, reputation: -10 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(PREPARAR)</span> "Vamos, pero con cuidado. Revisemos el arma."',
+                        next: 'llegada_tactica',
+                        effects: { instinct: 20, reputation: 5 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            llegada_rapida: {
+                text: `Las llantas chillan. Llegan en 45 segundos.\n\nA través del vidrio ves una escena del infierno: un tipo con máscara de esquí, pistola en mano, gritando al cajero. Hay dos clientes en el suelo, uno está sangrando del brazo.\n\n"¡MIERDA!" - Rodríguez desenfunda. "¡Novato, por la entrada trasera! ¡YA!"\n\nTu corazón late a mil. Tu mano tiembla sobre tu Glock 19. Primera vez que podrías tener que usarla.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(IRRUMPIR)</span> Entrar por la puerta principal, arma en alto, gritar órdenes',
+                        next: 'confrontacion_directa',
+                        effects: { violence: 20, reputation: 15, morality: -10, instinct: -5 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(FLANQUEAR)</span> Rodear silenciosamente, cubrir la salida trasera',
+                        next: 'tactica_trasera',
+                        effects: { instinct: 20, reputation: 10 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(NEGOCIAR)</span> Usar el altavoz del auto, intentar que se rinda',
+                        next: 'intento_negociacion',
+                        effects: { morality: 15, instinct: 10, reputation: -5 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            confrontacion_directa: {
+                text: `"¡POLICÍA! ¡SUELTA EL ARMA, HIJO DE PUTA!"\n\nIrrumpes como en las películas. Todo se vuelve lento.\n\nEl sospechoso se gira. Ves sus ojos - está drogado, completamente ido. Su dedo está en el gatillo.\n\nRodríguez grita "¡ABAJO!"\n\nEl tipo levanta el arma hacia ti. Medio segundo para decidir.\n\nTu dedo está en el gatillo. Todo tu entrenamiento grita: ELIMINA LA AMENAZA.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(DISPARAR)</span> Dos al pecho, uno a la cabeza. Protocolo.',
+                        next: 'disparo_mortal',
+                        effects: { violence: 40, morality: -20, reputation: 15, instinct: -10 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(PIERNA)</span> Dispararle a la pierna, neutralizar sin matar',
+                        next: 'disparo_pierna',
+                        effects: { violence: 20, morality: 5, instinct: 15, reputation: -5 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(ESQUIVAR)</span> Lanzarte al suelo, rodar, buscar cobertura',
+                        next: 'esquiva_tactica',
+                        effects: { instinct: 25, morality: 10 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(GRITAR)</span> "¡NO LO HAGAS! ¡PIENSA EN TU FAMILIA!"',
+                        next: 'ultimo_intento',
+                        effects: { morality: 20, instinct: 10, reputation: -10 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            disparo_mortal: {
+                text: `BANG. BANG. BANG.\n\nTres disparos. El retroceso te sacude el brazo.\n\nEl sospechoso cae. Sangre. Mucha sangre. Se expande en el suelo como aceite rojo.\n\nPrimer día. Primera muerte.\n\nEl cajero está gritando. Los rehenes están gritando. Tus manos tiemblan.\n\nRodríguez se acerca al cuerpo, revisa el pulso. "Está muerto." Te mira. "Buen trabajo, novato. Fue él o tú."\n\nPero cuando revisas el arma del sospechoso... es una puta pistola de juguete pintada de negro.\n\nTu estómago se contrae.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(REPORTAR)</span> "Sargento... el arma... es falsa..."',
+                        next: 'final_disparo_juguete',
+                        effects: { morality: -30, violence: 20 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(CALLAR)</span> No decir nada. Dejar que lo descubran después.',
+                        next: 'final_encubrimiento',
+                        effects: { morality: -40, reputation: 20, instinct: -20 },
+                        class: 'corrupt'
+                    },
+                    {
+                        text: '<span class="action-indicator">(JUSTIFICAR)</span> "Era una amenaza. Hice lo correcto."',
+                        next: 'final_sin_remordimiento',
+                        effects: { morality: -35, violence: 30, reputation: 15 },
+                        class: 'violent'
+                    }
+                ]
+            },
+
+            disparo_pierna: {
+                text: `BANG!\n\nLe disparas a la pierna. El sospechoso cae gritando, suelta el arma.\n\nRodríguez lo inmoviliza en segundos. "¡DESPEJADO!"\n\nSangre en todas partes, pero está vivo. Aullando de dolor, pero vivo.\n\nCuando revisas el arma... Cristo, es una pistola de juguete. Pintada de negro.\n\nEl tipo está llorando: "Mi... mi hermana... necesita medicinas... no tenía dinero... lo siento... lo siento..."\n\nTiene 19 años. Drogado hasta las cejas, pero solo 19.\n\nLa ambulancia llega. Los paramédicos dicen que sobrevivirá pero probablemente cojee de por vida.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(CONSOLAR)</span> "Vas a estar bien, chico. Te conseguiremos ayuda."',
+                        next: 'final_compasivo',
+                        effects: { morality: 20, reputation: 10, instinct: 15 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(INTERROGAR)</span> "¿Tu hermana? ¡CASI MATAS A GENTE POR ESO!"',
+                        next: 'final_justicia_dura',
+                        effects: { morality: -5, reputation: 15, violence: 10 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(INVESTIGAR)</span> Verificar su historia sobre la hermana enferma',
+                        next: 'final_investigacion',
+                        effects: { instinct: 25, morality: 15, reputation: 10 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            tactica_trasera: {
+                text: `Te mueves silencioso, arma lista, adrenalina a tope.\n\nLlegas a la puerta trasera justo cuando se abre.\n\nUn tipo flaco, no más de 20 años, sale corriendo. Máscara de esquí, pero puedes ver que está llorando.\n\nChoca contigo. Cae al suelo.\n\n"¡NO! ¡POR FAVOR! ¡Mi hermana está muriendo! ¡No tengo dinero para sus medicinas!"\n\nEstá desarmado. La pistola quedó adentro. Solo tiene una botella de pastillas en la mano que robó.\n\nLo tienes en el suelo. Podría arrestarlo fácilmente.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(ARRESTAR)</span> Esposarlo, leerle sus derechos. La ley es la ley.',
+                        next: 'arresto_protocolo',
+                        effects: { morality: -5, reputation: 15, instinct: -10 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(ESCUCHAR)</span> "Cuéntame sobre tu hermana. ¿Qué tiene?"',
+                        next: 'escuchar_historia',
+                        effects: { morality: 20, instinct: 20, reputation: -5 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(SOBORNAR)</span> "Te dejo ir... por 500 dólares."',
+                        next: 'inicio_corrupcion',
+                        effects: { morality: -30, reputation: -20, instinct: -15 },
+                        class: 'corrupt'
+                    },
+                    {
+                        text: '<span class="action-indicator">(GOLPEAR)</span> Darle una paliza antes de arrestarlo',
+                        next: 'brutalidad_policial',
+                        effects: { violence: 30, morality: -35, reputation: -10 },
+                        class: 'violent'
+                    }
+                ]
+            },
+
+            escuchar_historia: {
+                text: `El chico solloza. Te muestra una foto arrugada en su billetera.\n\nUna niña, tal vez 8 años, con una pañoleta en la cabeza. Cáncer. Leucemia.\n\n"Los doctores... dijeron que necesita un tratamiento experimental. $50,000. No tenemos seguro. Trabajé en McDonald's, Uber, lo que sea... no es suficiente. Ella tiene dos meses, tal vez..."\n\nLe revisas la billetera. $47 dólares. Un recibo médico del Hospital General. Todo verifica.\n\nRodríguez aparece. "¿Qué tenemos, novato?"\n\nEl chico te mira con ojos suplicantes.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(ABOGAR)</span> "Sargento, hay circunstancias atenuantes aquí..."',
+                        next: 'final_heroe_compasivo',
+                        effects: { morality: 30, instinct: 25, reputation: 15 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(ARRESTAR)</span> "Robó una tienda. Lo siento, pero es criminal."',
+                        next: 'final_ley_ciega',
+                        effects: { morality: -10, reputation: 10 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(AYUDAR)</span> "Déjame hacer algunas llamadas. Conozco gente en trabajo social."',
+                        next: 'final_salvador',
+                        effects: { morality: 35, reputation: 20, instinct: 20 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            espera_respaldo: {
+                text: `"Esperemos respaldo, Sargento. No sabemos si hay más sospechosos."\n\nRodríguez te mira con desprecio. "Cobarde."\n\nEsperan. 3 minutos. 4 minutos.\n\nBANG. BANG. BANG.\n\nDisparos desde la tienda.\n\n"¡MIERDA!" Rodríguez arranca el auto.\n\nCuando llegan, hay un cuerpo en el piso. El cajero. Muerto. Balazo en la cabeza.\n\nEl sospechoso huyó.\n\nRodríguez te mira. "Esto es culpa tuya, novato. Ese hombre tenía familia."`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(DEFENDERSE)</span> "Seguí el protocolo, no es mi culpa."',
+                        next: 'final_cobarde',
+                        effects: { morality: -25, reputation: -30, instinct: -20 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(ACEPTAR)</span> "Tiene razón. Debí actuar."',
+                        next: 'final_leccion_dura',
+                        effects: { morality: 15, instinct: 25, reputation: -15 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(RENUNCIAR)</span> "No puedo hacer esto. Renuncio."',
+                        next: 'final_renuncia',
+                        effects: { morality: 0, reputation: -40 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            // FINALES
+            final_disparo_juguete: {
+                text: `Reportas todo. Honestamente.\n\nInvestigación Interna. Suspensión con pago. Terapia obligatoria.\n\nEl tiroteo se declara "justificado bajo circunstancias". Pero las pesadillas no paran.\n\nEl sospechoso se llamaba Marcus Thompson. 22 años. Su hermana murió tres días después sin el tratamiento.\n\nSeis meses después, sigues siendo policía. Más cauteloso. Más humano. Pero nunca olvidarás esa primera muerte.\n\nCada noche ves su cara.`,
+                ending: "FINAL: EL PESO DE LA PLACA",
+                endingType: "neutral",
+                stats: true
+            },
+
+            final_encubrimiento: {
+                text: `No dices nada. Rodríguez nota el arma de juguete y te mira.\n\n"Novato... ven aquí." En voz baja: "Nadie más tiene que saber esto. Fue un tiroteo legítimo. ¿Entendido?"\n\nAsientes. Primer encubrimiento. Primer paso hacia la corrupción.\n\nEl reporte dice "sospechoso armado con pistola calibre 9mm". Caso cerrado.\n\nPero empiezas a beber. Las mentiras pesan. Te conviertes en el tipo de policía que juraste nunca ser.\n\n15 años después, eres Sargento. Corrupto. Brutal. Odiado por la comunidad.\n\nY nunca pudiste dormir bien otra vez.`,
+                ending: "FINAL: EL POLICÍA CORRUPTO",
+                endingType: "bad",
+                stats: true
+            },
+
+            final_compasivo: {
+                text: `Consolas al chico mientras lo llevan al hospital.\n\nInvestigas su historia. Todo es verdad. Su hermana tiene leucemia.\n\nUsas tus propios contactos. Llamas a trabajadores sociales, organizaciones benéficas, incluso a la prensa local.\n\nLa historia se vuelve viral. "Policía ayuda a familia desesperada."\n\nSe recaudan $75,000 en donaciones. Más que suficiente para el tratamiento.\n\nLa hermana sobrevive. El chico cumple servicios comunitarios en lugar de cárcel.\n\n5 años después, él es trabajador social. Tú eres detective.\n\nÉl te invita a la graduación universitaria de su hermana. Ella está sana.\n\n"Gracias por ver al humano, no solo al criminal."`,
+                ending: "FINAL: EL VERDADERO HÉROE",
+                endingType: "best",
+                stats: true
+            },
+
+            final_heroe_compasivo: {
+                text: `Abogás por él. Rodríguez escucha tu caso.\n\n"Tiene agallas, novato. Y corazón."\n\nConectan a la familia con servicios sociales de emergencia. La hermana recibe tratamiento gratuito a través de un programa estatal que nadie sabía que existía.\n\nEl chico acepta programa de rehabilitación y servicios comunitarios.\n\n2 años después: hermana sana, chico trabajando honestamente, sin antecedentes penales.\n\nRodríguez te palmea el hombro: "Esto es lo que significa servir y proteger."\n\nSalvaste dos vidas ese día. Y tu alma.`,
+                ending: "FINAL: PROTEGER Y SERVIR",
+                endingType: "best",
+                stats: true
+            },
+
+            final_cobarde: {
+                text: `Te aferras al protocolo. Pero todos saben la verdad.\n\nUna vida se perdió porque dudaste.\n\nLa estación te apoda "el Cobarde". Nadie quiere patrullar contigo.\n\n6 meses después, te transfieren a trabajo de escritorio.\n\nNunca vuelves a las calles.\n\nTécnicamente sigues siendo policía. Pero sabes que fallaste cuando más importaba.`,
+                ending: "FINAL: EL COBARDE",
+                endingType: "bad",
+                stats: true
+            },
+
+            final_leccion_dura: {
+                text: `Aceptas la responsabilidad. La culpa.\n\nEsa muerte te persigue, pero no te destruye.\n\nTe conviertes en el policía más preparado, más rápido, más decisivo de la estación.\n\nNunca más dudas cuando una vida está en juego.\n\nRodríguez te nombra su segundo al mando.\n\n"Aprendiste la lección más dura, novato. Y no te rompió. Eso te hace excepcional."\n\nSalvas 12 vidas en los siguientes 5 años. Pero nunca olvidas la que perdiste.`,
+                ending: "FINAL: FORJADO EN FUEGO",
+                endingType: "good",
+                stats: true
+            },
+
+            final_salvador: {
+                text: `Haces más que tu trabajo. Haces lo correcto.\n\nLlamas a contactos en trabajo social, hospitales, ONGs. Trabajas en tu tiempo libre.\n\nLa hermana recibe tratamiento gratuito. Se recupera completamente.\n\nEl chico evita la cárcel, entra en rehabilitación y programas de empleo.\n\n3 años después, es enfermero. Inspírado por los que salvaron a su hermana.\n\nTe ve en la calle: "Oficial... usted me salvó. Me dio una segunda oportunidad."\n\nRodríguez se entera y te recomienda para Detective.\n\n"No eres solo un buen policía, novato. Eres un buen ser humano."`,
+                ending: "FINAL: MÁS ALLÁ DEL DEBER",
+                endingType: "best",
+                stats: true
+            },
+
+            llegada_tactica: {
+                text: `"Vamos con cuidado, Sargento."\n\nRevisas tu Glock. Cargador lleno. Bala en recámara. Seguro quitado.\n\nLlegan sin sirenas. Se estacionan a media cuadra.\n\nDesde aquí ven la tienda. Hay movimiento adentro. Gente en el suelo. Un tipo con máscara gritando.\n\nRodríguez asiente con aprobación. "Buen instinto, novato. Ahora, ¿cómo entramos?"`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(FLANQUEAR)</span> Dividirse - uno adelante, uno atrás',
+                        next: 'tactica_trasera',
+                        effects: { instinct: 15, reputation: 10 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(NEGOCIAR)</span> Intentar contacto por megáfono primero',
+                        next: 'intento_negociacion',
+                        effects: { morality: 15, instinct: 10 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(OBSERVAR)</span> Esperar y ver qué hace el sospechoso',
+                        next: 'observacion_tactica',
+                        effects: { instinct: 20, morality: 5 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            intento_negociacion: {
+                text: `Agarras el megáfono de la patrulla.\n\n"Atención en la tienda. Soy el Oficial [tu nombre]. Estamos aquí para ayudar. Nadie tiene que salir herido. Suelta el arma y sal con las manos arriba."\n\nSilencio.\n\nLuego una voz quebrada desde adentro: "¡NO! ¡Mi hermana se está muriendo! ¡Necesito estas medicinas! ¡No voy a la cárcel!"\n\nRodríguez te mira. "Es joven. Está asustado. Podría funcionar... o podría empeorar."`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(EMPATIZAR)</span> "Entiendo que estés desesperado. Podemos ayudar a tu hermana."',
+                        next: 'negociacion_exitosa',
+                        effects: { morality: 25, instinct: 20, reputation: 15 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(PRESIONAR)</span> "Sal ahora o entramos por la fuerza. Tu elección."',
+                        next: 'negociacion_tensa',
+                        effects: { reputation: 10, violence: 10 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(MENTIR)</span> "Te garantizo que no irás a la cárcel. Solo sal."',
+                        next: 'mentira_tactica',
+                        effects: { morality: -15, reputation: 5, instinct: 10 },
+                        class: 'corrupt'
+                    }
+                ]
+            },
+
+            negociacion_exitosa: {
+                text: `"Escucha, sé que tu hermana te necesita. Por eso mismo debes rendirte. Muerto o en la cárcel no puedes ayudarla. Pero si sales ahora, trabajaremos contigo."\n\nSilencio largo.\n\nLa puerta se abre lentamente. El tipo sale. Máscara de esquí. Manos arriba. Está llorando.\n\nEs un chico. Tal vez 20 años.\n\n"Por favor... ella solo tiene 8 años... leucemia..."\n\nRodríguez lo esposa suavemente. Te mira impresionado.\n\n"Buen trabajo, novato. Salvaste vidas hoy."`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(AYUDAR)</span> Verificar su historia e intentar ayudar realmente',
+                        next: 'final_salvador',
+                        effects: { morality: 30, reputation: 25 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(PROCESAR)</span> Arrestarlo pero recomendar clemencia en corte',
+                        next: 'final_heroe_compasivo',
+                        effects: { morality: 15, reputation: 20 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            negociacion_tensa: {
+                text: `"Tienes 30 segundos o entramos."\n\nBANG!\n\nUn disparo desde adentro. Sale por la ventana.\n\n"¡MIERDA!" Rodríguez se tira al suelo.\n\nEl tipo sale corriendo por la puerta trasera.\n\nTienes que decidir AHORA.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(PERSEGUIR)</span> Correr tras él',
+                        next: 'persecucion_a_pie',
+                        effects: { instinct: 15, violence: 10 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(VERIFICAR)</span> Entrar a la tienda, ver si hay heridos',
+                        next: 'verificar_victimas',
+                        effects: { morality: 20, instinct: 15 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            esquiva_tactica: {
+                text: `Te lanzas al suelo justo cuando dispara.\n\nBANG!\n\nLa bala pasa silbando donde estaba tu cabeza.\n\nRuedas detrás de un estante. Rodríguez dispara dos veces. El sospechoso cae, herido en el hombro.\n\n"¡DESPEJADO!"\n\nEl tipo grita de dolor. Está vivo. Su arma... espera, es una puta pistola de juguete.\n\nRodríguez la recoge. "Hijo de puta... nos apuntó con esto."\n\nEl sospechoso solloza: "No... no quería... mi hermana..."`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(PRIMEROS AUXILIOS)</span> Atenderlo inmediatamente',
+                        next: 'salvar_sospechoso',
+                        effects: { morality: 20, reputation: 10 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(INTERROGAR)</span> "¿Tu hermana? ¡Casi nos matas!"',
+                        next: 'interrogatorio_duro',
+                        effects: { reputation: 10, violence: 10 },
+                        class: 'violent'
+                    }
+                ]
+            },
+
+            ultimo_intento: {
+                text: `"¡NO LO HAGAS! ¡PIENSA EN TU FAMILIA!"\n\nTus palabras lo detienen por un segundo.\n\nSus ojos... están llenos de lágrimas detrás de la máscara.\n\n"Mi familia... es por eso que estoy aquí..."\n\nBANG!\n\nDispara. Pero no a ti. Al techo.\n\nSe derrumba llorando. "No puedo... no puedo hacerlo... mi hermana me necesita..."\n\nSuelta el arma. Es una pistola de juguete.\n\nRodríguez lo esposa rápidamente. Te mira con nuevo respeto.\n\n"Tienes agallas, novato. Y corazón."`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(INVESTIGAR)</span> "Cuéntame sobre tu hermana."',
+                        next: 'escuchar_historia',
+                        effects: { morality: 25, instinct: 20 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(ARRESTAR)</span> "Buen intento, pero vas a la cárcel."',
+                        next: 'arresto_protocolo',
+                        effects: { reputation: 10, morality: -10 },
+                        class: 'violent'
+                    }
+                ]
+            },
+
+            arresto_protocolo: {
+                text: `Lo arrestas. Por el libro.\n\n"Tienes derecho a permanecer en silencio..."\n\nÉl llora todo el camino a la estación.\n\nLa investigación revela: hermana con leucemia, familia sin seguro, desesperación total.\n\nPero la ley es la ley.\n\n2 años de cárcel. Su hermana murió durante el juicio. Sin el tratamiento.\n\nTécnicamente hiciste todo correcto.\n\nPero cada noche te preguntas si había otra manera.`,
+                ending: "FINAL: LA LEY SOBRE LA VIDA",
+                endingType: "neutral",
+                stats: true
+            },
+
+            inicio_corrupcion: {
+                text: `"Te dejo ir... por 500 dólares."\n\nÉl te mira confundido. "No... no tengo dinero, por eso..."\n\n"Entonces tu familia puede reunirlo. Tienes 24 horas."\n\nPrimer soborno. Primer paso hacia la oscuridad.\n\nRodríguez te ve. "¿Qué haces, novato?"\n\n"Nada, Sargento. Se escapó."\n\n"Ya veo."\n\nHas cruzado una línea que nunca podrás descruzar.`,
+                ending: "FINAL: EL PRIMER SOBORNO",
+                endingType: "bad",
+                stats: true
+            },
+
+            brutalidad_policial: {
+                text: `Le das un puñetazo en la cara.\n\nLuego otro. Y otro.\n\nLa rabia toma control. Por casi matarte. Por el miedo que sentiste.\n\nRodríguez te detiene. "¡BASTA, NOVATO!"\n\nEl chico está sangrando. Nariz rota. Labio partido.\n\n"Esto no está bien," dice Rodríguez en voz baja.\n\nLo llevan al hospital antes que a la estación.\n\nAsuntos Internos abre investigación.\n\nSuspensión de 3 meses sin pago.\n\nCuando vuelves, todos saben lo que hiciste.\n\nTe has convertido en el tipo de policía que la gente teme.`,
+                ending: "FINAL: EL BRUTAL",
+                endingType: "bad",
+                stats: true
+            },
+
+            final_justicia_dura: {
+                text: `"¡¿Tu hermana?! ¡CASI MATAS A GENTE INOCENTE POR ESO!"\n\nTu rabia es real. El miedo que sentiste se convierte en furia.\n\nÉl va a la cárcel. 3 años.\n\nSu hermana muere sin tratamiento.\n\nAños después descubres que existía un programa de ayuda que nadie les dijo que existía.\n\nPodrías haberlo investigado. Podrías haber ayudado.\n\nEn cambio, elegiste el castigo sobre la compasión.\n\nEres un buen policía. Pero no un buen humano.`,
+                ending: "FINAL: JUSTICIA SIN PIEDAD",
+                endingType: "neutral",
+                stats: true
+            },
+
+            final_investigacion: {
+                text: `"Verificaré tu historia."\n\nInvestigas. Todo es verdad. Hermana con leucemia. Familia sin recursos.\n\nPero también descubres: existe un programa estatal que cubre estos casos. Nadie se los dijo.\n\nHaces las conexiones necesarias. La hermana recibe tratamiento gratuito.\n\nÉl cumple servicios comunitarios en lugar de cárcel.\n\n5 años después: hermana sana, él trabajando como técnico médico de emergencias.\n\n"Oficial, usted no solo me arrestó. Me dio una razón para ser mejor."\n\nRodríguez te asciende. "Eso es ser detective, novato. Ver más allá de lo obvio."`,
+                ending: "FINAL: EL DETECTIVE PERSPICAZ",
+                endingType: "best",
+                stats: true
+            },
+
+            final_sin_remordimiento: {
+                text: `"Era una amenaza. Hice lo correcto. Volvería a hacerlo."\n\nRodríguez asiente. "Así es, novato."\n\nEl tiroteo se declara justificado.\n\nPero algo cambió en ti esa noche. Mataste sin saber si era necesario.\n\nY no sientes nada.\n\nTe conviertes en el tipo de policía que dispara primero, pregunta después.\n\n3 tiroteos más en 2 años. Todos "justificados".\n\nLa comunidad te teme. Los criminales te odian.\n\nTus compañeros te respetan... pero nadie quiere ser tu amigo.\n\nEres efectivo. Pero has perdido tu humanidad.`,
+                ending: "FINAL: LA MÁQUINA DE MATAR",
+                endingType: "bad",
+                stats: true
+            },
+
+            final_renuncia: {
+                text: `"No puedo hacer esto. Renuncio."\n\nTe quitas la placa. La pones sobre el capó de la patrulla.\n\nRodríguez no intenta detenerte.\n\n"No todos sirven para esto, novato. Al menos lo descubriste rápido."\n\nUn hombre murió porque dudaste. Esa verdad te persigue.\n\n5 años después trabajas en ventas. Vida normal. Segura.\n\nPero cada vez que ves un policía, te preguntas: ¿Qué hubiera pasado si no hubiera renunciado?`,
+                ending: "FINAL: EL QUE SE RINDIÓ",
+                endingType: "bad",
+                stats: true
+            },
+
+            observacion_tactica: {
+                text: `Observas cuidadosamente. Tomas nota de todo.\n\nEl sospechoso está nervioso. Se mueve errático. Probablemente drogado.\n\nPero también ves: está solo. No hay refuerzos. No hay plan de escape real.\n\nEs un amateur. Un desesperado.\n\nRodríguez susurra: "Bien observado. Es un novato, como tú. Pero armado."\n\nLa situación se está calmando. Puedes intentar negociar o actuar.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(HABLAR)</span> Intentar negociación por megáfono',
+                        next: 'intento_negociacion',
+                        effects: { morality: 15, instinct: 15 },
+                        class: 'diplomatic'
+                    },
+                    {
+                        text: '<span class="action-indicator">(ACTUAR)</span> Entrada táctica coordinada',
+                        next: 'tactica_trasera',
+                        effects: { instinct: 15, reputation: 10 },
+                        class: 'violent'
+                    }
+                ]
+            },
+
+            mentira_tactica: {
+                text: `"Te garantizo que no irás a la cárcel. Solo sal y hablamos."\n\nEs mentira. Irá a la cárcel.\n\nPero funciona. Sale con las manos arriba.\n\nCuando le pones las esposas, se da cuenta: "Dijiste... dijiste que no iría a la cárcel..."\n\n"Mentí."\n\nSu cara se descompone. "Mi hermana... por favor..."\n\nRodríguez te mira con decepción.\n\nAños después, esa mentira te come por dentro. Resolviste la situación, sí.\n\nPero a qué costo para tu alma?`,
+                ending: "FINAL: EL MENTIROSO EFECTIVO",
+                endingType: "neutral",
+                stats: true
+            },
+
+            persecucion_a_pie: {
+                text: `"¡YO VOY TRAS ÉL!"\n\nCorres. Es rápido, pero tú también.\n\nCallejones. Basura. Perros ladrando.\n\nLo alcanzas en un callejón sin salida.\n\nSe voltea. Pistola en mano... no, pistola de juguete.\n\n"No te acerques... lo haré..."\n\nEstá temblando. Es un niño asustado con un juguete.`,
+                choices: [
+                    {
+                        text: '<span class="action-indicator">(DISPARAR)</span> No arriesgarse. Eliminar la amenaza.',
+                        next: 'disparo_mortal',
+                        effects: { violence: 40, morality: -25 },
+                        class: 'violent'
+                    },
+                    {
+                        text: '<span class="action-indicator">(HABLAR)</span> "Es un juguete. Los dos lo sabemos. Ríndete."',
+                        next: 'final_compasivo',
+                        effects: { morality: 25, instinct: 20 },
+                        class: 'diplomatic'
+                    }
+                ]
+            },
+
+            verificar_victimas: {
+                text: `"¡Voy a ver si hay heridos!"\n\nEntras a la tienda. Cajero en el suelo. Está vivo, asustado, pero sin heridas.\n\nDos clientes. Aterrorizados pero bien.\n\n"¿Alguien herido?"\n\n"No... no... se asustó y huyó..."\n\nRodríguez entra. "El sospechoso escapó, pero salvaste vidas al verificar primero."\n\nEl caso queda abierto, pero cero víctimas.\n\nA veces no atrapar al malo es menos importante que proteger a los buenos.`,
+                ending: "FINAL: PRIMERO LAS VÍCTIMAS",
+                endingType: "good",
+                stats: true
+            },
+
+            salvar_sospechoso: {
+                text: `Aplicas presión en la herida. "¡Necesito una ambulancia!"\n\nRodríguez llama a emergencias.\n\nMientras lo atiendes, él susurra: "Mi hermana... leucemia... solo quería las medicinas..."\n\nLe salvas la vida. Los paramédicos llegan.\n\nMás tarde investigas: todo es verdad. Conectas a su familia con ayuda social.\n\nLa hermana recibe tratamiento. Él cumple servicios comunitarios.\n\n"Salvaste mi vida dos veces, oficial. Literalmente y figurativamente."`,
+                ending: "FINAL: EL SANADOR",
+                endingType: "best",
+                stats: true
+            },
+
+            interrogatorio_duro: {
+                text: `"¡¿TU HERMANA?! ¡NOS APUNTASTE CON UN ARMA!"\n\n"Era... era de juguete... nunca... nunca quise..."\n\n"¡CASI MUERES POR ESO!"\n\nÉl va a la cárcel. Su hermana no recibe ayuda.\n\nAños después descubres que existían programas de asistencia.\n\nPodrías haber investigado. Podrías haber ayudado.\n\nEn cambio, tu rabia decidió por ti.`,
+                ending: "FINAL: LA FURIA CIEGA",
+                endingType: "neutral",
+                stats: true
+            },
+
+            final_ley_ciega: {
+                text: `"Robó una tienda. Amenazó gente. Es criminal, punto."\n\nRodríguez no está de acuerdo, pero no te detiene.\n\nEl chico va a la cárcel. 18 meses.\n\nSu hermana muere durante su sentencia. Sin tratamiento.\n\nEn su funeral, te enteras que existía ayuda disponible. Nadie se las dijo.\n\nSeguiste la ley al pie de la letra.\n\nPero la ley no siempre es justicia.\n\nEres un buen oficial. Pero te falta corazón.`,
+                ending: "FINAL: LETRA MUERTA",
+                endingType: "neutral",
+                stats: true
+            }
+        };
+
+        function updateStats() {
+            const morality = document.getElementById('morality');
+            const reputation = document.getElementById('reputation');
+            const instinct = document.getElementById('instinct');
+            const violence = document.getElementById('violence');
+
+            morality.textContent = gameState.morality;
+            reputation.textContent = gameState.reputation;
+            instinct.textContent = gameState.instinct;
+            violence.textContent = gameState.violence;
+
+            morality.className = 'stat-value ' + (gameState.morality < 30 ? 'low' : gameState.morality > 70 ? 'high' : '');
+            reputation.className = 'stat-value ' + (gameState.reputation < 30 ? 'low' : gameState.reputation > 70 ? 'high' : '');
+            instinct.className = 'stat-value ' + (gameState.instinct < 30 ? 'low' : gameState.instinct > 70 ? 'high' : '');
+            violence.className = 'stat-value ' + (gameState.violence > 30 ? 'low' : '');
+        }
+
+        function showScene(sceneId) {
+            const scene = scenes[sceneId];
+            if (!scene) {
+                console.error('Scene not found:', sceneId);
+                return;
+            }
+
+            const storyDiv = document.getElementById('story');
+            const choicesDiv = document.getElementById('choices');
+
+            storyDiv.innerHTML = scene.text.replace(/\n/g, '<br><br>');
+            choicesDiv.innerHTML = '';
+
+            if (scene.ending) {
+                const endingDiv = document.createElement('div');
+                endingDiv.className = 'ending ' + (scene.endingType || '');
+                
+                let statsHTML = '';
+                if (scene.stats) {
+                    statsHTML = `
+                        <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.9;">
+                            Moral: ${gameState.morality} | Reputación: ${gameState.reputation} | 
+                            Instinto: ${gameState.instinct} | Violencia: ${gameState.violence}
+                        </p>
+                    `;
+                }
+                
+                endingDiv.innerHTML = `
+                    <h2>${scene.ending}</h2>
+                    ${statsHTML}
+                    <button class="restart-btn" onclick="restartGame()">Jugar de Nuevo</button>
+                `;
+                choicesDiv.appendChild(endingDiv);
+                return;
+            }
+
+            scene.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn ' + (choice.class || '');
+                button.innerHTML = `${index + 1}. ${choice.text}`;
+                button.onclick = () => makeChoice(choice);
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        function makeChoice(choice) {
+            if (choice.effects) {
+                gameState.morality = Math.max(0, Math.min(100, gameState.morality + (choice.effects.morality || 0)));
+                gameState.reputation = Math.max(0, Math.min(100, gameState.reputation + (choice.effects.reputation || 0)));
+                gameState.instinct = Math.max(0, Math.min(100, gameState.instinct + (choice.effects.instinct || 0)));
+                gameState.violence = Math.max(0, Math.min(100, gameState.violence + (choice.effects.violence || 0)));
+            }
+
+            gameState.decisions.push(choice.text);
+            updateStats();
+            
+            if (choice.next && scenes[choice.next]) {
+                gameState.currentScene = choice.next;
+                showScene(choice.next);
+            } else {
+                console.error('Next scene not found:', choice.next);
+            }
+        }
+
+        function restartGame() {
+            gameState = {
+                morality: 50,
+                reputation: 50,
+                instinct: 50,
+                violence: 0,
+                currentScene: 'inicio',
+                decisions: [],
+                kills: 0,
+                wounded: 0
+            };
+            updateStats();
+            showScene('inicio');
+        }
+
+        showScene('inicio');
+        updateStats();
+    </script>
+</body>
+</html>
