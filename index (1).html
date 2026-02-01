@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rookie - Juego Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            max-width: 800px;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #141E30 0%, #243B55 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .badge {
+            font-size: 0.9em;
+            opacity: 0.9;
+            letter-spacing: 2px;
+        }
+
+        .story-container {
+            padding: 40px;
+            min-height: 400px;
+        }
+
+        .story-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 25px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .choice-btn:active {
+            transform: translateY(0);
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #243B55;
+        }
+
+        .ending {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .ending h2 {
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .restart-btn {
+            background: white;
+            color: #f5576c;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .story-container {
+                padding: 20px;
+            }
+            
+            .story-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🚔 THE ROOKIE</h1>
+            <div class="badge">DEPARTAMENTO DE POLICÍA - PRIMER DÍA</div>
+        </div>
+        
+        <div class="story-container">
+            <div class="stats" id="stats">
+                <div class="stat">
+                    <div class="stat-label">Confianza del Equipo</div>
+                    <div class="stat-value" id="trust">50</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Reputación</div>
+                    <div class="stat-value" id="reputation">50</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Intuición</div>
+                    <div class="stat-value" id="intuition">50</div>
+                </div>
+            </div>
+            
+            <div class="story-text" id="story"></div>
+            <div class="choices" id="choices"></div>
+        </div>
+    </div>
+
+    <script>
+        // ESTADO DEL JUEGO
+        let gameState = {
+            trust: 50,        // Confianza de tus compañeros
+            reputation: 50,   // Tu reputación en el departamento
+            intuition: 50,    // Tu instinto policial
+            currentScene: 'inicio',
+            decisions: []     // Guardamos las decisiones para finales diferentes
+        };
+
+        // ESCENAS DEL JUEGO
+        const scenes = {
+            inicio: {
+                text: `Es tu primer día como oficial de policía. Después de años de entrenamiento, finalmente llevas la placa. Son las 7:00 AM y acabas de llegar a la estación.\n\nTu superior, el Sargento Rodríguez, un veterano de 20 años, se acerca con dos tazas de café.\n\n"Bienvenido, novato. Hoy serás mi compañero. Tenemos una ciudad que proteger y mucho que enseñarte. ¿Listo para tu primer turno?"`,
+                choices: [
+                    {
+                        text: '"¡Sí, señor! Estoy listo para lo que sea."',
+                        next: 'patrulla',
+                        effects: { trust: 5, reputation: 5 }
+                    },
+                    {
+                        text: '"La verdad estoy un poco nervioso, pero haré mi mejor esfuerzo."',
+                        next: 'patrulla',
+                        effects: { trust: 10, intuition: 5 }
+                    },
+                    {
+                        text: '"Tengo algunas preguntas sobre los protocolos antes de salir..."',
+                        next: 'patrulla',
+                        effects: { reputation: -5, intuition: 10 }
+                    }
+                ]
+            },
+
+            patrulla: {
+                text: `Dos horas después, patrullan un barrio tranquilo cuando la radio crepita:\n\n"Todas las unidades: reportan disturbio en la tienda de conveniencia en la calle Elm. Posible robo en progreso. ¿Alguna unidad disponible?"\n\nEstán a solo dos cuadras de distancia. El Sargento Rodríguez te mira. "Es tu decisión, novato. Somos los más cercanos."`,
+                choices: [
+                    {
+                        text: '"¡Respondamos! Somos los más cercanos, tenemos que ir."',
+                        next: 'tienda_rapido',
+                        effects: { reputation: 10, trust: -5 }
+                    },
+                    {
+                        text: '"¿Qué recomienda usted, Sargento? Usted tiene más experiencia."',
+                        next: 'tienda_cauteloso',
+                        effects: { trust: 10 }
+                    },
+                    {
+                        text: '"Esperemos respaldo. Podría ser peligroso ir solos."',
+                        next: 'esperar_respaldo',
+                        effects: { intuition: 10, reputation: -10 }
+                    }
+                ]
+            },
+
+            tienda_rapido: {
+                text: `"Me gusta tu iniciativa", dice Rodríguez mientras enciende las sirenas.\n\nLlegan en menos de un minuto. A través del vidrio ves a un hombre con capucha apuntando algo al cajero. No puedes distinguir si es un arma real.\n\nRodríguez ya está saliendo del auto. "¡Vamos!"`,
+                choices: [
+                    {
+                        text: 'Entrar inmediatamente por la puerta principal con Rodríguez',
+                        next: 'entrada_frontal',
+                        effects: { trust: 10, intuition: -10 }
+                    },
+                    {
+                        text: 'Sugerir rodear el edificio para cubrir la salida trasera',
+                        next: 'tactica_inteligente',
+                        effects: { intuition: 15, reputation: 10 }
+                    },
+                    {
+                        text: 'Pedir que esperen a ver qué pasa antes de actuar',
+                        next: 'observar',
+                        effects: { trust: -10, intuition: 10 }
+                    }
+                ]
+            },
+
+            tienda_cauteloso: {
+                text: `Rodríguez asiente con aprobación. "Bien. Nunca está de más ser cauteloso. Vamos, pero mantén los ojos abiertos."\n\nLlegan con sirenas apagadas y se estacionan a media cuadra. Desde aquí pueden ver la entrada. Hay un auto sospechoso con el motor encendido afuera.\n\n"Podría ser un cómplice esperando", murmura Rodríguez.`,
+                choices: [
+                    {
+                        text: 'Acercarse sigilosamente al auto sospechoso',
+                        next: 'auto_complice',
+                        effects: { intuition: 15, trust: 10 }
+                    },
+                    {
+                        text: 'Reportar el vehículo y esperar instrucciones',
+                        next: 'protocolo_estricto',
+                        effects: { reputation: -5, trust: 5 }
+                    },
+                    {
+                        text: 'Dividirse: uno al auto, otro a la tienda',
+                        next: 'dividir_fuerzas',
+                        effects: { reputation: 10, trust: -5 }
+                    }
+                ]
+            },
+
+            esperar_respaldo: {
+                text: `Rodríguez te mira con decepción. "A veces no hay tiempo para esperar, novato."\n\nAntes de que puedas responder, escuchan disparos desde la tienda. Tu estómago se contrae.\n\n"¡Mierda! ¡Ahora tenemos que ir!" Rodríguez arranca hacia allá con sirenas a todo volumen.\n\nCuando llegan, ves a un hombre corriendo por el callejón lateral.`,
+                choices: [
+                    {
+                        text: 'Perseguir al sospechoso inmediatamente',
+                        next: 'persecucion',
+                        effects: { reputation: 5, trust: -10 }
+                    },
+                    {
+                        text: 'Entrar primero a la tienda para verificar heridos',
+                        next: 'prioridad_victimas',
+                        effects: { reputation: 15, intuition: 10 }
+                    },
+                    {
+                        text: 'Dividirse: tú persigues, Rodríguez verifica la tienda',
+                        next: 'division_emergencia',
+                        effects: { trust: 5, intuition: -5 }
+                    }
+                ]
+            },
+
+            tactica_inteligente: {
+                text: `"Buen pensamiento táctico, novato", dice Rodríguez impresionado. "Tú toma la parte trasera. Nos coordinamos por radio."\n\nRodeas el edificio rápidamente. Justo cuando llegas a la puerta trasera, esta se abre de golpe. Un hombre joven, no mayor de 20 años, sale corriendo y casi choca contigo. En su mano derecha lleva... una botella de licor.\n\nTus ojos se encuentran. Él está aterrorizado. Tú tienes segundos para reaccionar.`,
+                choices: [
+                    {
+                        text: 'Gritar "¡Alto! ¡Policía!" e intentar detenerlo físicamente',
+                        next: 'arresto_fisico',
+                        effects: { reputation: 10, intuition: -5 }
+                    },
+                    {
+                        text: 'Desenfundar tu arma y ordenar que se tire al suelo',
+                        next: 'arma_desenfundada',
+                        effects: { trust: 5, intuition: -10 }
+                    },
+                    {
+                        text: 'Hablarle calmadamente: "Oye, no hagas esto peor. Detente y hablemos."',
+                        next: 'enfoque_calmado',
+                        effects: { intuition: 15, reputation: 5 }
+                    }
+                ]
+            },
+
+            enfoque_calmado: {
+                text: `El joven se detiene, temblando. "Yo... yo solo quería... mi hermanita está enferma y no tengo dinero para..."\n\nSe derrumba llorando. No parece peligroso, solo desesperado. La botella de licor cae al suelo. Entonces notas algo: no hay arma. Lo que el cajero reportó como posible arma era solo su dedo en el bolsillo.\n\nRodríguez llega por detrás: "¿Todo bajo control aquí?"\n\nEl cajero sale gritando: "¡Arréstenlo! ¡Intentó robarme!"`,
+                choices: [
+                    {
+                        text: 'Arrestarlo de inmediato, la ley es la ley',
+                        next: 'final_ley_estricta',
+                        effects: { reputation: 10, trust: 10, intuition: -15 }
+                    },
+                    {
+                        text: 'Explicar la situación a Rodríguez y abogar por ayudar al joven',
+                        next: 'final_compasion',
+                        effects: { intuition: 20, reputation: 15, trust: 5 }
+                    },
+                    {
+                        text: 'Arrestarlo pero prometer buscar ayuda para su hermana',
+                        next: 'final_equilibrio',
+                        effects: { reputation: 15, trust: 15, intuition: 10 }
+                    }
+                ]
+            },
+
+            entrada_frontal: {
+                text: `Entran juntos gritando "¡Policía!"\n\nEl sospechoso se voltea sorprendido. No es un arma... es un teléfono. Es un adolescente asustado.\n\n"¡No disparen! ¡Solo quería... mi mamá está enferma!"\n\nEl cajero grita: "¡Dijo que tenía un arma! ¡Me amenazó!"\n\nRodríguez te mira, esperando que tomes la iniciativa esta vez.`,
+                choices: [
+                    {
+                        text: 'Arrestar al joven de inmediato por intento de robo',
+                        next: 'final_protocolo',
+                        effects: { reputation: 5, trust: 10 }
+                    },
+                    {
+                        text: 'Intentar mediar entre el cajero y el joven',
+                        next: 'final_mediador',
+                        effects: { intuition: 15, reputation: 10 }
+                    }
+                ]
+            },
+
+            auto_complice: {
+                text: `Se acercan sigilosamente al vehículo. Dentro hay una mujer mayor, claramente nerviosa, pero cuando la identifican descubren que es la dueña de la tienda.\n\n"¡Oficiales! Mi empleado me llamó. Hay alguien dentro amenazándolo. Por favor, ¡ayúdenlo!"\n\nNo hay cómplice. Es la dueña preocupada. Rodríguez te mira: "Tu instinto era bueno, novato. Ahora, ¿cómo manejamos esto?"`,
+                choices: [
+                    {
+                        text: 'Pedirle a la dueña información y entrar con precaución',
+                        next: 'entrada_informada',
+                        effects: { intuition: 15, trust: 10 }
+                    },
+                    {
+                        text: 'Pedir refuerzos inmediatamente',
+                        next: 'final_cauteloso',
+                        effects: { reputation: -5, trust: 5 }
+                    }
+                ]
+            },
+
+            entrada_informada: {
+                text: `La dueña explica: "Es un muchacho joven, lo conozco del barrio. Su familia está pasando por problemas económicos terribles..."\n\nCon esta información, entran con más comprensión de la situación. Encuentran a un adolescente asustado, sin arma real, desesperado por ayudar a su familia.\n\nRodríguez te mira: "Has mostrado buen juicio hoy, novato. ¿Cómo crees que debemos proceder?"`,
+                choices: [
+                    {
+                        text: 'Proponer conectar a la familia con servicios sociales en lugar de arrestarlo',
+                        next: 'final_heroe_comunidad',
+                        effects: { intuition: 20, reputation: 20, trust: 15 }
+                    },
+                    {
+                        text: 'Arrestarlo pero abogar por cargos reducidos dada la situación',
+                        next: 'final_justicia_compasiva',
+                        effects: { reputation: 15, trust: 15, intuition: 10 }
+                    }
+                ]
+            },
+
+            // FINALES
+            final_ley_estricta: {
+                text: `Arrestas al joven. Cumpliste con el protocolo al pie de la letra.\n\nMeses después, descubres que fue sentenciado a 2 años. Su hermana no recibió el tratamiento a tiempo.\n\nRodríguez te dice: "Hiciste lo correcto según el libro, novato. Pero a veces la ley no es suficiente para hacer justicia real."\n\nTe has convertido en un oficial que sigue las reglas... pero te preguntas si eso siempre es lo correcto.`,
+                ending: "FINAL: EL GUARDIÁN DE LA LEY",
+                endingType: "neutral"
+            },
+
+            final_compasion: {
+                text: `Explicas la situación a Rodríguez. Para tu sorpresa, él asiente.\n\n"Buen ojo, novato. Vi lo mismo." Hablan con el cajero, quien acepta no presentar cargos.\n\nConectan a la familia con servicios sociales. La hermana recibe tratamiento. El joven empieza un programa de empleo juvenil.\n\nSeis meses después, te lo encuentras trabajando honestamente. Te agradece por ver a la persona, no solo al criminal.\n\nRodríguez sonríe: "Esto es lo que significa proteger Y servir, novato. Buen trabajo."`,
+                ending: "FINAL: EL PROTECTOR DE LA COMUNIDAD",
+                endingType: "best"
+            },
+
+            final_equilibrio: {
+                text: `Arrestas al joven porque quebrantó la ley, pero inmediatamente contactas a servicios sociales para su hermana.\n\nEn la corte, tu testimonio sobre las circunstancias resulta en servicios comunitarios en lugar de cárcel. Su hermana recibe ayuda médica.\n\nRodríguez te felicita: "Encontraste el equilibrio, novato. Cumpliste la ley pero no perdiste tu humanidad. Eso es lo que necesitamos más."\n\nTe has convertido en un oficial que entiende que la justicia es más que solo arrestos.`,
+                ending: "FINAL: LA BALANZA DE LA JUSTICIA",
+                endingType: "good"
+            },
+
+            final_protocolo: {
+                text: `Sigues el protocolo estándar. El joven es arrestado y procesado.\n\nLa situación se resuelve sin incidentes. Rodríguez te palmea el hombro: "Buen trabajo, novato. Limpio y profesional."\n\nPero esa noche no puedes dormir pensando en el rostro asustado del adolescente. ¿Había otra manera?\n\nTe has convertido en un oficial competente... pero te preguntas si competente es suficiente.`,
+                ending: "FINAL: POR EL LIBRO",
+                endingType: "neutral"
+            },
+
+            final_mediador: {
+                text: `Logras calmar la situación y mediar entre ambas partes.\n\nEl cajero acepta no presentar cargos si el joven se disculpa y promete buscar ayuda adecuada. Conectas a la familia con recursos comunitarios.\n\nRodríguez está impresionado: "No solo resolviste un crimen, evitaste crear un criminal. Bien hecho, novato."\n\nTe has ganado una reputación como alguien que puede resolver situaciones sin que todo termine en arrestos.`,
+                ending: "FINAL: EL PACIFICADOR",
+                endingType: "good"
+            },
+
+            final_heroe_comunidad: {
+                text: `Tu sugerencia toma a Rodríguez por sorpresa, pero tras pensarlo, acepta.\n\nTrabajan con la dueña de la tienda y servicios sociales. La familia recibe ayuda. El joven entra en un programa de mentoría policial que tú personalmente supervisas.\n\nUn año después, él está estudiando justicia criminal, inspirado por cómo lo trataste.\n\nEl capitán te llama: "Oficial, esto es lo que significa verdaderamente servir a la comunidad. Estoy orgulloso de tenerte en el equipo."\n\nRodríguez sonríe: "Desde el primer día vi que serías especial, novato. O mejor dicho... oficial."`,
+                ending: "FINAL: HÉROE DE LA COMUNIDAD",
+                endingType: "best"
+            },
+
+            final_justicia_compasiva: {
+                text: `Tu enfoque balanceado impresiona tanto a Rodríguez como al fiscal.\n\nEl joven es arrestado pero recibe cargos reducidos y libertad condicional con servicios comunitarios. Su familia recibe ayuda de servicios sociales.\n\nMeses después, te lo encuentras cumpliendo sus horas comunitarias... en un programa de la policía ayudando a otros jóvenes en riesgo.\n\nRodríguez te dice: "Hiciste lo correcto, novato. Responsabilidad con compasión. Ese es el balance que necesitamos."\n\nTe has convertido en el tipo de oficial que la comunidad necesita y respeta.`,
+                ending: "FINAL: LA JUSTICIA SABIA",
+                endingType: "best"
+            },
+
+            final_cauteloso: {
+                text: `Esperas refuerzos. Para cuando llegan, el sospechoso ya huyó.\n\nNadie resultó herido, pero tampoco atraparon a nadie. El incidente queda sin resolver.\n\nRodríguez no dice nada, pero su silencio dice todo. En los siguientes meses, notas que prefiere patrullar con otros oficiales.\n\nEres cauteloso y seguro... pero te preguntas si ser policía requiere más que eso.`,
+                ending: "FINAL: EL CAUTELOSO",
+                endingType: "bad"
+            },
+
+            persecucion: {
+                text: `Corres tras el sospechoso, pero pierdes su rastro en los callejones.\n\nCuando regresas, Rodríguez está atendiendo al cajero herido. "Necesitaba ayuda aquí, novato," dice decepcionado.\n\nEl sospechoso nunca es capturado. El cajero sobrevive, pero tu relación con Rodríguez está dañada.\n\nAprendiste una lección dura: no siempre se trata de atrapar al malo.`,
+                ending: "FINAL: PRIORIDADES EQUIVOCADAS",
+                endingType: "bad"
+            },
+
+            prioridad_victimas: {
+                text: `Ignoras al sospechoso y corres a la tienda. El cajero está herido pero consciente.\n\nMientras Rodríguez persigue al sospechoso, tú salvas la vida del cajero aplicando primeros auxilios hasta que llega la ambulancia.\n\nEl sospechoso escapa, pero el cajero sobrevive gracias a ti. Rodríguez te dice: "Hiciste lo correcto, novato. Primero las vidas."\n\nNo atrapaste al criminal, pero salvaste una vida. A veces eso es más importante.`,
+                ending: "FINAL: EL SALVADOR",
+                endingType: "good"
+            }
+        };
+
+        // FUNCIONES DEL JUEGO
+        function updateStats() {
+            document.getElementById('trust').textContent = gameState.trust;
+            document.getElementById('reputation').textContent = gameState.reputation;
+            document.getElementById('intuition').textContent = gameState.intuition;
+        }
+
+        function showScene(sceneId) {
+            const scene = scenes[sceneId];
+            const storyDiv = document.getElementById('story');
+            const choicesDiv = document.getElementById('choices');
+
+            // Mostrar texto de la escena
+            storyDiv.textContent = scene.text;
+
+            // Limpiar opciones anteriores
+            choicesDiv.innerHTML = '';
+
+            // Si es un final
+            if (scene.ending) {
+                const endingDiv = document.createElement('div');
+                endingDiv.className = 'ending';
+                
+                let endingColor = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+                if (scene.endingType === 'best') {
+                    endingColor = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+                } else if (scene.endingType === 'good') {
+                    endingColor = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+                } else if (scene.endingType === 'bad') {
+                    endingColor = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+                }
+                
+                endingDiv.style.background = endingColor;
+                
+                endingDiv.innerHTML = `
+                    <h2>${scene.ending}</h2>
+                    <p>Confianza del Equipo: ${gameState.trust}</p>
+                    <p>Reputación: ${gameState.reputation}</p>
+                    <p>Intuición: ${gameState.intuition}</p>
+                    <button class="restart-btn" onclick="restartGame()">Jugar de Nuevo</button>
+                `;
+                choicesDiv.appendChild(endingDiv);
+                return;
+            }
+
+            // Crear botones de elección
+            scene.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.textContent = `${index + 1}. ${choice.text}`;
+                button.onclick = () => makeChoice(choice);
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        function makeChoice(choice) {
+            // Aplicar efectos a las estadísticas
+            if (choice.effects) {
+                gameState.trust = Math.max(0, Math.min(100, gameState.trust + (choice.effects.trust || 0)));
+                gameState.reputation = Math.max(0, Math.min(100, gameState.reputation + (choice.effects.reputation || 0)));
+                gameState.intuition = Math.max(0, Math.min(100, gameState.intuition + (choice.effects.intuition || 0)));
+            }
+
+            // Guardar decisión
+            gameState.decisions.push(choice.text);
+
+            // Actualizar estadísticas
+            updateStats();
+
+            // Ir a la siguiente escena
+            gameState.currentScene = choice.next;
+            showScene(choice.next);
+        }
+
+        function restartGame() {
+            gameState = {
+                trust: 50,
+                reputation: 50,
+                intuition: 50,
+                currentScene: 'inicio',
+                decisions: []
+            };
+            updateStats();
+            showScene('inicio');
+        }
+
+        // INICIAR EL JUEGO
+        showScene('inicio');
+    </script>
+</body>
+</html>
